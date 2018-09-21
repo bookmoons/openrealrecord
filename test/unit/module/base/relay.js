@@ -27,10 +27,9 @@ tape('stop', t => {
   const prot = { sendStop: sinon.spy() }
   const exposer = sinon.fake()
   const relay = new ModuleRelay(prot, exposer)
-  relay.stop().then(() => {
-    t.true(prot.sendStop.calledOnce, 'stop sender called')
-    t.end()
-  })
+  relay.stop()
+  t.true(prot.sendStop.calledOnce, 'stop sender called')
+  t.end()
 })
 
 tape('done', t => {
