@@ -1,8 +1,12 @@
 const sinon = require('sinon')
 const StubModuleRelay = require('./relay')
 
+const instances = []
+
 class StubModuleController {
   constructor (stream, exposer) {
+    instances.push(this)
+    const self = this
     this.stream = stream
     this.done = sinon.stub()
     this.write = sinon.stub()
@@ -11,11 +15,15 @@ class StubModuleController {
     const receiveStop = this.receiveStop = sinon.stub()
     const relay = this.relay = new StubModuleRelay(
       { deliverStop: receiveStop },
-      function receiveRelayProtected () {}
+      function receiveRelayProtected ({ deliverDone }) {
+        self.deliverDone = deliverDone
+      }
     )
     Object.freeze(this)
     exposer({ relay })
   }
+
+  static get instances () { return instances }
 }
 
 Object.freeze(StubModuleController)
