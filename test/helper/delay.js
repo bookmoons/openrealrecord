@@ -1,10 +1,6 @@
 class Delay {
   static milliseconds (time) {
-    return new Promise(resolve => {
-      setTimeout(function handleDelayElapsed () {
-        resolve()
-      }, time)
-    })
+    return new Promise(resolve => { setTimeout(resolve, time) })
   }
 
   static seconds (time) { return Delay.milliseconds(time * 1000) }
