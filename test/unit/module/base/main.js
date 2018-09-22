@@ -1,4 +1,4 @@
-const tape = require('tape')
+const test = require('ava')
 const sinon = require('sinon')
 const mockRequire = require('mock-require')
 const Delay = require('helper/delay')
@@ -9,25 +9,23 @@ mockRequire('module/base/controller', StubModuleController)
 
 const Module = require('module/base/main')
 
-tape('construct', t => {
+test('construct', t => {
   const stream = new DummyStream()
   const executor = sinon.spy()
-  t.doesNotThrow(() => {
+  t.notThrows(() => {
     new Module(stream, executor) /* eslint-disable-line no-new */
   }, 'constructed')
-  t.end()
 })
 
-tape('start', t => {
+test('start', t => {
   const stream = new DummyStream()
   const executor = sinon.spy(async function executor () {})
   const module = new Module(stream, executor)
   module.start()
   t.true(executor.calledOnce, 'launched executor')
-  t.end()
 })
 
-tape('stop', t => {
+test('stop', async t => {
   const stream = new DummyStream()
   const module = new Module(stream, async function executor (controller) {
     controller.getter.stop.returns(false).onThirdCall().returns(true)
@@ -41,12 +39,10 @@ tape('stop', t => {
     t.fail('never received stop')
   })
   module.start()
-  module.stop().then(function handleModuleStopped () {
-    t.end()
-  })
+  await t.notThrowsAsync(module.stop(), 'stop complete')
 })
 
-tape('restart', t => {
+test('restart', async t => {
   const stream = new DummyStream()
   const executor = sinon.spy(async function executor (controller) {
     controller.getter.stop.returns(false).onThirdCall().returns(true)
@@ -57,34 +53,32 @@ tape('restart', t => {
   })
   const module = new Module(stream, executor)
   module.start()
-  module.stop().then(function handleModuleStopped () {
-    module.start()
-    t.true(executor.calledTwice, 'relaunched executor')
-    t.end()
-  })
+  await t.notThrowsAsync(module.stop(), 'stop complete')
+  module.start()
+  t.true(executor.calledTwice, 'relaunched executor')
 })
 
-tape('done', t => {
+test('done', async t => {
   const stream = new DummyStream()
   const module = new Module(stream, async function executor (controller) {
     controller.relay.resolve.done()
     controller.done()
   })
-  module.done.then(function handleModuleDone () {
-    t.pass('received done')
-    t.end()
-  })
+  const done = module.done
   module.start()
+  await t.notThrowsAsync(done, 'received done')
 })
 
-tape('error', t => {
+test('error', async t => {
   const stream = new DummyStream()
   const module = new Module(stream, async function executor () {
     throw new Error('executor failed')
   })
-  module.done.catch(function handleModuleError () {
-    t.pass('received error')
-    t.end()
-  })
+  const done = module.done
   module.start()
+  await t.throwsAsync(
+    done,
+    { instanceOf: Error, message: 'executor failed' },
+    'received error'
+  )
 })

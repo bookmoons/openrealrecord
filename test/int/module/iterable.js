@@ -1,4 +1,4 @@
-const tape = require('tape')
+const test = require('ava')
 const mockRequire = require('mock-require')
 const DummyStream = require('dummy/stream')
 const StubModuleController = require('stub/module/base/controller')
@@ -8,16 +8,15 @@ mockRequire('module/base/controller', StubModuleController)
 
 const IterableModule = require('module/iterable')
 
-tape('construct', t => {
+test('construct', t => {
   const stream = new DummyStream()
   const data = []
-  t.doesNotThrow(() => {
+  t.notThrows(() => {
     new IterableModule(stream, data) /* eslint-disable-line no-new */
   })
-  t.end()
 })
 
-tape('write', t => {
+test.cb('write', t => {
   const stream = new DummyStream()
   const data = [
     Buffer.from([ 1 ]),
