@@ -17,7 +17,7 @@ tape('expose', t => {
   new ModuleRelay(
     prot,
     function receiveRelayProtected ({ deliverDone }) {
-      t.is(typeof deliverDone, 'function', 'done sender exposed')
+      t.is(typeof deliverDone, 'function', 'deliver done exposed')
     }
   )
   t.end()
@@ -28,7 +28,7 @@ tape('stop', t => {
   const exposer = sinon.fake()
   const relay = new ModuleRelay(prot, exposer)
   relay.stop()
-  t.true(prot.deliverStop.calledOnce, 'stop sender called')
+  t.true(prot.deliverStop.calledOnce, 'deliver stop called')
   t.end()
 })
 
