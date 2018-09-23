@@ -4,10 +4,12 @@ const StubModuleRelay = require('./relay')
 const instances = []
 
 class StubModuleController {
-  constructor (stream, exposer) {
+  constructor (...args) {
+    this.args = args
+    this.stream = args[0]
+    const exposer = this.exposer = args[1]
     instances.push(this)
     const self = this
-    this.stream = stream
     this.done = sinon.stub()
     this.write = sinon.stub()
     this.getter = { stop: sinon.stub() }
