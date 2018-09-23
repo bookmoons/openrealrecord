@@ -3,7 +3,9 @@ const sinon = require('sinon')
 const mockRequire = require('mock-require')
 const StubStream = require('stub/stream')
 
+const StubModuleControllerPromises = require('stub/module/base/promises')
 const StubModuleRelay = require('stub/module/base/relay')
+mockRequire('module/base/promises', StubModuleControllerPromises)
 mockRequire('module/base/relay', StubModuleRelay)
 
 const ModuleController = require('module/base/controller')
@@ -69,4 +71,19 @@ test('stop', t => {
   t.false(controller.stop, 'stop initially clear')
   deliverStop()
   t.true(controller.stop, 'stop delivered')
+})
+
+test('stop promise', async t => {
+  const stream = new StubStream()
+  let deliverStop
+  const controller = new ModuleController(
+    stream,
+    function receiveControllerProtected ({ relay }) {
+      deliverStop = relay.deliverStop
+    }
+  )
+  t.false(controller.stop, 'stop initially clear')
+  const stopPromise = controller.promise.args[0].stop
+  deliverStop()
+  await t.notThrowsAsync(stopPromise, 'stop promise resolved')
 })
