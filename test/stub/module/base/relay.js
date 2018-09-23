@@ -1,10 +1,7 @@
 const sinon = require('sinon')
 
-const instances = []
-
 class StubModuleRelay {
   constructor ({ deliverStop }, exposer) {
-    instances.push(this)
     this.deliverStop = sinon.spy(deliverStop)
     this.promise = { done: null }
     this.resolve = { done: null }
@@ -22,8 +19,6 @@ class StubModuleRelay {
     Object.freeze(this)
     exposer({ deliverDone })
   }
-
-  static get instances () { return instances }
 }
 
 Object.freeze(StubModuleRelay)
