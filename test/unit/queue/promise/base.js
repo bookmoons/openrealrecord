@@ -13,6 +13,7 @@ test('expose', t => {
   /* eslint-disable-next-line no-new */
   new PromiseQueue(function exposer (prot) {
     t.is(typeof prot.add, 'function', 'add exposed')
+    t.is(typeof prot.fail, 'function', 'fail exposed')
   })
 })
 
@@ -75,4 +76,53 @@ test('queued requests', async t => {
   t.is(await first, 57)
   t.is(await second, 58)
   t.is(await third, 59)
+})
+
+test('fail', t => {
+  /* eslint-disable-next-line no-new */
+  new PromiseQueue(function exposer ({ fail }) {
+    t.notThrows(() => {
+      const error = new Error('fail')
+      fail(error)
+    }, 'successful fail')
+  })
+})
+
+test('double fail', t => {
+  /* eslint-disable-next-line no-new */
+  new PromiseQueue(function exposer ({ fail }) {
+    fail(new Error('fail'))
+    t.notThrows(fail, 'ignored double fail')
+  })
+})
+
+test('errored add', t => {
+  /* eslint-disable-next-line no-new */
+  new PromiseQueue(function exposer ({ add, fail }) {
+    fail(new Error('fail'))
+    t.throws(() => {
+      add(57)
+    }, 'queue add while errored', 'errored add')
+  })
+})
+
+test('errored request', async t => {
+  const queue = new PromiseQueue(function exposer ({ fail }) {
+    fail(new Error('fail'))
+  })
+  await t.throwsAsync(queue.next, 'fail', 'errored request')
+})
+
+test('reject queued requests', async t => {
+  let fail
+  const queue = new PromiseQueue(function exposer (prot) {
+    fail = prot.fail
+  })
+  const next1 = queue.next
+  const next2 = queue.next
+  const next3 = queue.next
+  fail(new Error('fail'))
+  await t.throwsAsync(next1, 'fail', 'rejected queued request 1')
+  await t.throwsAsync(next2, 'fail', 'rejected queued request 2')
+  await t.throwsAsync(next3, 'fail', 'rejected queued request 3')
 })
