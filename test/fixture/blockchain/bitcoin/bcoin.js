@@ -320,6 +320,7 @@ const privm = {
       workers: false,
       logFile: false,
       logConsole: false,
+      logLevel: 'debug',
       nodeApiKey: this.chainNodeApiKey,
       apiKey: this.walletNodeApiKey,
 
