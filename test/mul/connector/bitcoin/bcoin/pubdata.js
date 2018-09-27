@@ -9,6 +9,28 @@ const BcoinBitcoinConnector = require('connector/bitcoin/bcoin')
 const regtest = bcoin.Network.get('regtest')
 const feeRate = 1000000 // 0.01 BTC
 
+// Watch chain for confirmation of named transaction
+function txConfirmed (blockchain, txid) {
+  return new Promise(function executeTxConfirmed (resolve, reject) {
+    function handleTimeout () {
+      blockchain.chainNode.removeListener('block', checkBlockForTx)
+      reject(new Error('timed out'))
+    }
+    function checkBlockForTx (block) {
+      if (block.txs.length < 2) return
+      for (const tx of block.txs) {
+        if (tx.txid() === txid) {
+          blockchain.chainNode.removeListener('block', checkBlockForTx)
+          resolve(tx)
+          return
+        }
+      }
+    }
+    Delay.seconds(1).then(handleTimeout)
+    blockchain.chainNode.on('block', checkBlockForTx)
+  })
+}
+
 test.beforeEach(async t => {
   const blockchain = new BcoinBitcoinBlockchainFixture()
   await blockchain.setup()
@@ -87,27 +109,10 @@ test.serial('success', async t => {
   t.is(typeof txid, 'string')
   t.is(txid.length, 64)
   t.regex(txid, /[0-9a-fA-F]{2}/g) // Hexadecimal string
-  const confirmedPromise = new Promise((resolve, reject) => {
-    function handleTimeout () {
-      blockchain.chainNode.removeListener('block', checkBlockForTx)
-      reject(new Error('timed out'))
-    }
-    function checkBlockForTx (block) {
-      if (block.txs.length < 2) return
-      for (const tx of block.txs) {
-        if (tx.txid() === txid) {
-          blockchain.chainNode.removeListener('block', checkBlockForTx)
-          resolve(tx)
-          return
-        }
-      }
-    }
-    Delay.seconds(1).then(handleTimeout)
-    blockchain.chainNode.on('block', checkBlockForTx)
-  })
-  await blockchain.chainNodeClient.execute('generate', [ 1 ])
-  await t.notThrowsAsync(confirmedPromise, 'tx published')
-  const tx = await confirmedPromise
+  const txConfirmedPromise = txConfirmed(blockchain, txid)
+  await blockchain.chainNodeClient.execute('generate', [ 5 ])
+  await t.notThrowsAsync(txConfirmedPromise, 'tx published')
+  const tx = await txConfirmedPromise
   const output = (function extractOutput () {
     for (const output of tx.outputs) {
       if (output.getType() === 'nulldata') return output
