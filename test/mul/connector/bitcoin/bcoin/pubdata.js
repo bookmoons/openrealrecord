@@ -31,6 +31,17 @@ test.afterEach(async t => {
   if (t.context.blockchain) await t.context.blockchain.teardown()
 })
 
+test.serial('too much data', async t => {
+  const { connector } = t.context
+  const data = Buffer.alloc(41)
+  const publishDataPromise = connector.publishData(data)
+  await t.throwsAsync(
+    publishDataPromise,
+    'too much data',
+    'too much data fails'
+  )
+})
+
 test.serial('success', async t => {
   const { blockchain, connector } = t.context
   const data = Buffer.from([ 0x01, 0x02, 0x03 ])
