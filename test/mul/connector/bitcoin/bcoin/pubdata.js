@@ -46,6 +46,7 @@ test.beforeEach(async t => {
       account: blockchain.walletAccount
     }
   })
+  await connector.init()
   t.context.connector = connector
 })
 
