@@ -60,8 +60,6 @@ class BcoinBitcoinBlockchainFixture {
     const { address } = await walletClient.createAddress(
       this.walletAccount
     )
-    chainNode.miner.addresses.push(address)
-    await chainNodeClient.execute('generate', [ 300 ])
     Object.assign(priv, {
       chainNode,
       chainNodeClient,
@@ -71,6 +69,20 @@ class BcoinBitcoinBlockchainFixture {
       walletClient,
       address
     })
+  }
+
+  /**
+   * Mine coins into generated address.
+   *
+   * TODO: Mine less and await propagation.
+   *
+   * @param {number} [blocksCount=300] - Number of blocks to mine.
+   */
+  async mine (blocksCount = 300) {
+    const priv = privs.get(this)
+    const { address, chainNode, chainNodeClient } = priv
+    chainNode.miner.addresses.push(address)
+    await chainNodeClient.execute('generate', [ blocksCount ])
   }
 
   /**

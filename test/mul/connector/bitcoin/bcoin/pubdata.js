@@ -56,6 +56,7 @@ test.serial('wallet node unavailable', async t => {
 
 test.serial('chain node unavailable', async t => {
   const { blockchain, connector } = t.context
+  await blockchain.mine()
   await blockchain.destroyChainNode()
   const data = Buffer.alloc(0)
   const publishDataPromise = connector.publishData(data)
@@ -68,6 +69,7 @@ test.serial('chain node unavailable', async t => {
 
 test.serial('success', async t => {
   const { blockchain, connector } = t.context
+  await blockchain.mine()
   const data = Buffer.from([ 0x01, 0x02, 0x03 ])
   const txid = await connector.publishData(data)
   t.is(typeof txid, 'string')
