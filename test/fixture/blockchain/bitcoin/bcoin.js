@@ -79,12 +79,23 @@ class BcoinBitcoinBlockchainFixture {
   async teardown () {
     const priv = privs.get(this)
     priv.chainClient = null
-    await privm.destroyChainNode.call(this, priv.chainNode)
+    await this.destroyChainNode()
     priv.chainNode = null
     priv.walletClient = null
     await this.destroyWalletNode()
     priv.walletNode = null
     priv.walletToken = null
+  }
+
+  /**
+   * Destroy chain node.
+   */
+  async destroyChainNode () {
+    const priv = privs.get(this)
+    const chainNode = priv.chainNode
+    if (!chainNode) return
+    await chainNode.disconnect()
+    await chainNode.close()
   }
 
   /**
@@ -319,16 +330,6 @@ const privm = {
       apiKey: this.walletNodeApiKey
     })
     return client
-  },
-
-  /**
-   * Destroy chain node.
-   *
-   * @param {bcoin.FullNode} node - Chain node to destroy.
-   */
-  async destroyChainNode (node) {
-    await node.disconnect()
-    await node.close()
   }
 }
 
