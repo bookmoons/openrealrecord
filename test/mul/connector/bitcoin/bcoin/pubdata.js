@@ -42,6 +42,18 @@ test.serial('too much data', async t => {
   )
 })
 
+test.serial('wallet node unavailable', async t => {
+  const { blockchain, connector } = t.context
+  await blockchain.walletNode.close()
+  const data = Buffer.alloc(0)
+  const publishDataPromise = connector.publishData(data)
+  await t.throwsAsync(
+    publishDataPromise,
+    { code: 'ECONNREFUSED' },
+    'publish without wallet node fails'
+  )
+})
+
 test.serial('success', async t => {
   const { blockchain, connector } = t.context
   const data = Buffer.from([ 0x01, 0x02, 0x03 ])
