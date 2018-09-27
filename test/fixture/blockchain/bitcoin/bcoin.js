@@ -82,9 +82,22 @@ class BcoinBitcoinBlockchainFixture {
     await privm.destroyChainNode.call(this, priv.chainNode)
     priv.chainNode = null
     priv.walletClient = null
-    await privm.destroyWalletNode.call(this, priv.walletNode)
+    await this.destroyWalletNode()
     priv.walletNode = null
     priv.walletToken = null
+  }
+
+  /**
+   * Destroy wallet node.
+   *
+   * No effect if fixture is inactive.
+   * No effect if wallet node is inactive.
+   */
+  async destroyWalletNode () {
+    const priv = privs.get(this)
+    const walletNode = priv.walletNode
+    if (!walletNode) return
+    if (walletNode.opened) await walletNode.close()
   }
 
   /**
@@ -316,15 +329,6 @@ const privm = {
   async destroyChainNode (node) {
     await node.disconnect()
     await node.close()
-  },
-
-  /**
-   * Destroy wallet node.
-   *
-   * @param {bcoin.wallet.Node}
-   */
-  async destroyWalletNode (node) {
-    if (node.opened) await node.close()
   }
 }
 
