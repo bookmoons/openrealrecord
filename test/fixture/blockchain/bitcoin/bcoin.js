@@ -324,7 +324,7 @@ const privm = {
    * @param {bcoin.wallet.Node}
    */
   async destroyWalletNode (node) {
-    await node.close()
+    if (node.opened) await node.close()
   }
 }
 
