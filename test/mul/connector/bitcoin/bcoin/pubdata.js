@@ -31,7 +31,7 @@ test.afterEach(async t => {
   if (t.context.blockchain) await t.context.blockchain.teardown()
 })
 
-test('publish', async t => {
+test('success', async t => {
   const { blockchain, connector } = t.context
   const data = Buffer.from([ 0x01, 0x02, 0x03 ])
   const txid = await connector.publishData(data)
