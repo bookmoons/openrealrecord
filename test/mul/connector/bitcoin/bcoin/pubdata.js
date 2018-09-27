@@ -27,7 +27,7 @@ test.beforeEach(async t => {
   t.context.connector = connector
 })
 
-test.afterEach(async t => {
+test.afterEach.always(async t => {
   if (t.context.blockchain) await t.context.blockchain.teardown()
 })
 
