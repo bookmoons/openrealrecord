@@ -116,8 +116,8 @@ test.serial('success', async t => {
   const output = (function extractOutput () {
     for (const output of tx.outputs) {
       if (output.getType() === 'nulldata') return output
-      return null
     }
+    return null
   })()
   t.truthy(output, 'tx has data')
   const script = output.script
