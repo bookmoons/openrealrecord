@@ -54,6 +54,18 @@ test.serial('wallet node unavailable', async t => {
   )
 })
 
+test.serial('chain node unavailable', async t => {
+  const { blockchain, connector } = t.context
+  await blockchain.destroyChainNode()
+  const data = Buffer.alloc(0)
+  const publishDataPromise = connector.publishData(data)
+  await t.throwsAsync(
+    publishDataPromise,
+    'Request timed out.',
+    'publish without chain node fails'
+  )
+})
+
 test.serial('success', async t => {
   const { blockchain, connector } = t.context
   const data = Buffer.from([ 0x01, 0x02, 0x03 ])
