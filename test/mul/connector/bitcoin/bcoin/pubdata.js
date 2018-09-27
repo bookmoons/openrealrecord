@@ -110,7 +110,7 @@ test.serial('success', async t => {
   t.is(txid.length, 64)
   t.regex(txid, /[0-9a-fA-F]{2}/g) // Hexadecimal string
   const txConfirmedPromise = txConfirmed(blockchain, txid)
-  await blockchain.chainNodeClient.execute('generate', [ 5 ])
+  await blockchain.chainNodeClient.execute('generate', [ 1 ])
   await t.notThrowsAsync(txConfirmedPromise, 'tx published')
   const tx = await txConfirmedPromise
   const output = (function extractOutput () {
