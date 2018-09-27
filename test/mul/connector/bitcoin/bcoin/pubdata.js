@@ -7,20 +7,13 @@ const StaticBitcoinFeeProvider = require('provider/bitcoin/fee/static')
 const BcoinBitcoinConnector = require('connector/bitcoin/bcoin')
 
 const regtest = bcoin.Network.get('regtest')
+const feeRate = 1000000 // 0.01 BTC
 
 test.beforeEach(async t => {
   const blockchain = new BcoinBitcoinBlockchainFixture()
   await blockchain.setup()
   t.context.blockchain = blockchain
-})
-
-test.afterEach(async t => {
-  if (t.context.blockchain) await t.context.blockchain.teardown()
-})
-
-test('publish', async t => {
-  const blockchain = t.context.blockchain
-  const feeProvider = new StaticBitcoinFeeProvider(1000000) // 0.01 BTC
+  const feeProvider = new StaticBitcoinFeeProvider(feeRate)
   const connector = new BcoinBitcoinConnector({
     network: regtest,
     feeProvider,
@@ -31,6 +24,15 @@ test('publish', async t => {
       account: blockchain.walletAccount
     }
   })
+  t.context.connector = connector
+})
+
+test.afterEach(async t => {
+  if (t.context.blockchain) await t.context.blockchain.teardown()
+})
+
+test('publish', async t => {
+  const { blockchain, connector } = t.context
   const data = Buffer.from([ 0x01, 0x02, 0x03 ])
   const txid = await connector.publishData(data)
   t.is(typeof txid, 'string')
