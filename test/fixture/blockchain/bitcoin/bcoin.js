@@ -89,13 +89,16 @@ class BcoinBitcoinBlockchainFixture {
 
   /**
    * Destroy chain node.
+   *
+   * No effect if fixture is inactive.
+   * No effect if chain node is inactive.
    */
   async destroyChainNode () {
     const priv = privs.get(this)
     const chainNode = priv.chainNode
     if (!chainNode) return
-    await chainNode.disconnect()
-    await chainNode.close()
+    if (chainNode.pool.connected) await chainNode.disconnect()
+    if (chainNode.opened) await chainNode.close()
   }
 
   /**
