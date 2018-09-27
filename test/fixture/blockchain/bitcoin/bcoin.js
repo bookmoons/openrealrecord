@@ -23,7 +23,6 @@ const privs = new WeakMap()
  * - Wallet node has 1 wallet created.
  * - Wallet has 1 account created.
  * - Account has 1 receiving address created.
- * - Chain node has mined 101 blocks to provide address with 50 BTC.
  */
 class BcoinBitcoinBlockchainFixture {
   constructor () {
