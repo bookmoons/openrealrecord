@@ -44,7 +44,7 @@ test.serial('too much data', async t => {
 
 test.serial('wallet node unavailable', async t => {
   const { blockchain, connector } = t.context
-  await blockchain.walletNode.close()
+  await blockchain.destroyWalletNode()
   const data = Buffer.alloc(0)
   const publishDataPromise = connector.publishData(data)
   await t.throwsAsync(
