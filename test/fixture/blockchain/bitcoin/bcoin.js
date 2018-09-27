@@ -19,7 +19,6 @@ const privs = new WeakMap()
  *
  * Sets up with this configuration:
  *
- * - Chain node does not listen for other nodes.
  * - Wallet node has 1 wallet created.
  * - Wallet has 1 account created.
  * - Account has 1 receiving address created.
