@@ -67,6 +67,17 @@ test.serial('chain node unavailable', async t => {
   )
 })
 
+test.serial('insufficient funds', async t => {
+  const { connector } = t.context
+  const data = Buffer.alloc(0)
+  const publishDataPromise = connector.publishData(data)
+  await t.throwsAsync(
+    publishDataPromise,
+    /^Not enough funds\./,
+    'publish without funds fails'
+  )
+})
+
 test.serial('success', async t => {
   const { blockchain, connector } = t.context
   await blockchain.mine()
