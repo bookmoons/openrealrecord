@@ -34,7 +34,6 @@ function txConfirmed (blockchain, txid) {
 test.beforeEach(async t => {
   const blockchain = new BcoinBitcoinBlockchainFixture()
   await blockchain.setup()
-  t.context.blockchain = blockchain
   const feeProvider = new StaticBitcoinFeeProvider(feeRate)
   const connector = new BcoinBitcoinConnector({
     network: regtest,
@@ -47,7 +46,10 @@ test.beforeEach(async t => {
     }
   })
   await connector.init()
-  t.context.connector = connector
+  Object.assign(t.context, {
+    blockchain,
+    connector
+  })
 })
 
 test.afterEach.always(async t => {
