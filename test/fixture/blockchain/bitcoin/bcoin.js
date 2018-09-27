@@ -269,6 +269,8 @@ const privm = {
     const node = new bcoin.FullNode({
       network: regtest.type,
       listen: true,
+      port: regtest.port,
+      httpPort: regtest.rpcPort,
       memory: true,
       workers: true,
       logFile: false,
@@ -314,6 +316,8 @@ const privm = {
     const node = new bcoin.wallet.Node({
       network: regtest.type,
       listen: true,
+      rpcPort: regtest.rpcPort,
+      httpPort: regtest.walletPort,
       memory: true,
       workers: false,
       logFile: false,
