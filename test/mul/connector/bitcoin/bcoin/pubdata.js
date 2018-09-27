@@ -28,7 +28,8 @@ test.beforeEach(async t => {
 })
 
 test.afterEach.always(async t => {
-  if (t.context.blockchain) await t.context.blockchain.teardown()
+  const { blockchain } = t.context
+  if (blockchain) await blockchain.teardown()
 })
 
 test.serial('too much data', async t => {
