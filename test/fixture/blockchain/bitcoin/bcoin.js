@@ -266,8 +266,7 @@ const privm = {
   async createChainNode () {
     const node = new bcoin.FullNode({
       network: regtest.type,
-      listen: true,
-      port: regtest.port,
+      listen: false,
       httpPort: regtest.rpcPort,
       memory: true,
       workers: true,
