@@ -323,7 +323,6 @@ const privm = {
       hash: false
     })
     await node.open()
-    await node.connect()
     const httpServer = node.http.http
     const { port: rpcPort } = httpServer.address()
     return { node, rpcPort }
