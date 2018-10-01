@@ -27,6 +27,7 @@ class BcoinBitcoinBlockchainFixture {
   constructor () {
     const priv = {
       chainNode: null,
+      chainNodeRpcPort: null,
       chainNodeClient: null,
       walletNode: null,
       walletNodeClient: null,
@@ -43,8 +44,10 @@ class BcoinBitcoinBlockchainFixture {
   async setup () {
     const priv = privs.get(this)
     const {
-      node: chainNode
+      node: chainNode,
+      rpcPort: chainNodeRpcPort
     } = await privm.createChainNode.call(this)
+    priv.chainNodeRpcPort = chainNodeRpcPort
     const {
       client: chainNodeClient
     } = await privm.createChainNodeClient.call(this)
@@ -99,6 +102,7 @@ class BcoinBitcoinBlockchainFixture {
     priv.chainClient = null
     await this.destroyChainNode()
     priv.chainNode = null
+    priv.chainNodeRpcPort = null
     priv.walletClient = null
     await this.destroyWalletNode()
     priv.walletNode = null
@@ -225,6 +229,19 @@ class BcoinBitcoinBlockchainFixture {
   }
 
   /**
+   * Chain node RPC server port.
+   *
+   * `null` if fixture is inactive.
+   *
+   * @var {?number}
+   * @readonly
+   */
+  get chainNodeRpcPort () {
+    const priv = privs.get(this)
+    return priv.chainNodeRpcPort
+  }
+
+  /**
    * Wallet node.
    *
    * `null` if fixture is inactive.
@@ -275,7 +292,7 @@ const privm = {
     const node = new bcoin.FullNode({
       network: regtest.type,
       listen: false,
-      httpPort: regtest.rpcPort,
+      httpPort: 0, // Arbitrary unused port
       memory: true,
       workers: true,
       logFile: false,
@@ -291,7 +308,9 @@ const privm = {
     })
     await node.open()
     await node.connect()
-    return { node }
+    const httpServer = node.http.http
+    const { port: rpcPort } = httpServer.address()
+    return { node, rpcPort }
   },
 
   /**
@@ -304,7 +323,7 @@ const privm = {
   createChainNodeClient () {
     const client = new NodeClient({
       network: regtest.type,
-      port: regtest.rpcPort,
+      port: this.chainNodeRpcPort,
       apiKey: this.chainNodeApiKey
     })
     return { client }
@@ -321,7 +340,7 @@ const privm = {
     const node = new bcoin.wallet.Node({
       network: regtest.type,
       listen: false,
-      nodePort: regtest.rpcPort,
+      nodePort: this.chainNodeRpcPort,
       httpPort: regtest.walletPort,
       memory: true,
       workers: false,
@@ -362,6 +381,7 @@ const privm = {
  * @typedef {object} CreateChainNodeReturn
  *
  * @prop {bcoin.FullNode} node - Chain node.
+ * @prop {number} rpcPort - RPC server port.
  */
 
 /**
