@@ -42,7 +42,9 @@ class BcoinBitcoinBlockchainFixture {
    */
   async setup () {
     const priv = privs.get(this)
-    const chainNode = await privm.createChainNode.call(this)
+    const {
+      node: chainNode
+    } = await privm.createChainNode.call(this)
     const chainNodeClient = privm.createChainNodeClient.call(this)
     const walletNode = await privm.createWalletNode.call(this)
     const walletNodeClient = privm.createWalletNodeClient.call(this)
@@ -261,7 +263,7 @@ const privm = {
   /**
    * Create chain node.
    *
-   * @return {bcoin.FullNode} Chain node.
+   * @return {CreateChainNodeReturn}
    */
   async createChainNode () {
     const node = new bcoin.FullNode({
@@ -283,7 +285,7 @@ const privm = {
     })
     await node.open()
     await node.connect()
-    return node
+    return { node }
   },
 
   /**
@@ -349,5 +351,11 @@ const privm = {
     return client
   }
 }
+
+/**
+ * @typedef {object} CreateChainNodeReturn
+ *
+ * @prop {bcoin.FullNode} node - Chain node.
+ */
 
 module.exports = BcoinBitcoinBlockchainFixture
