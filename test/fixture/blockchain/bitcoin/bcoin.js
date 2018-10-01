@@ -321,7 +321,7 @@ const privm = {
     const node = new bcoin.wallet.Node({
       network: regtest.type,
       listen: false,
-      rpcPort: regtest.rpcPort,
+      nodePort: regtest.rpcPort,
       httpPort: regtest.walletPort,
       memory: true,
       workers: false,
