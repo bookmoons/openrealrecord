@@ -335,12 +335,13 @@ const privm = {
    *
    * @return {CreateChainNodeClientReturn}
    */
-  createChainNodeClient () {
+  async createChainNodeClient () {
     const client = new NodeClient({
       network: regtest.type,
       port: this.chainNodeRpcPort,
       apiKey: this.chainNodeApiKey
     })
+    await client.open()
     return { client }
   },
 
