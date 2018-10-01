@@ -45,7 +45,9 @@ class BcoinBitcoinBlockchainFixture {
     const {
       node: chainNode
     } = await privm.createChainNode.call(this)
-    const chainNodeClient = privm.createChainNodeClient.call(this)
+    const {
+      client: chainNodeClient
+    } = await privm.createChainNodeClient.call(this)
     const walletNode = await privm.createWalletNode.call(this)
     const walletNodeClient = privm.createWalletNodeClient.call(this)
     const walletDetails = await walletNodeClient.createWallet(
@@ -293,7 +295,7 @@ const privm = {
    *
    * Connects to chain node.
    *
-   * @return {bclient.NodeClient} Chain node client.
+   * @return {CreateChainNodeClientReturn}
    */
   createChainNodeClient () {
     const client = new NodeClient({
@@ -301,7 +303,7 @@ const privm = {
       port: regtest.rpcPort,
       apiKey: this.chainNodeApiKey
     })
-    return client
+    return { client }
   },
 
   /**
@@ -356,6 +358,12 @@ const privm = {
  * @typedef {object} CreateChainNodeReturn
  *
  * @prop {bcoin.FullNode} node - Chain node.
+ */
+
+/**
+ * @typedef {object} CreateChainNodeClientReturn
+ *
+ * @prop {bclient.NodeClient} client - Chain node client.
  */
 
 module.exports = BcoinBitcoinBlockchainFixture
