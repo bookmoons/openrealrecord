@@ -59,7 +59,7 @@ class BcoinBitcoinBlockchainFixture {
     priv.walletNodeRpcPort = walletNodeRpcPort
     const {
       client: walletNodeClient
-    } = privm.createWalletNodeClient.call(this)
+    } = await privm.createWalletNodeClient.call(this)
     const walletDetails = await walletNodeClient.createWallet(
       this.walletId,
       { passphrase: this.passphrase }
@@ -385,12 +385,13 @@ const privm = {
    *
    * @return {CreateWalletNodeClientReturn}
    */
-  createWalletNodeClient () {
+  async createWalletNodeClient () {
     const client = new WalletClient({
       network: regtest.type,
       port: this.walletNodeRpcPort,
       apiKey: this.walletNodeApiKey
     })
+    await client.open()
     return { client }
   }
 }
