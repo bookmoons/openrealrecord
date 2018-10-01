@@ -65,6 +65,7 @@ class BcoinBitcoinBlockchainFixture {
       { passphrase: this.passphrase }
     )
     const walletClient = walletNodeClient.wallet(this.walletId)
+    await walletClient.open()
     await walletClient.createAccount(
       this.walletAccount,
       { name: this.walletAccount, passphrase: this.passphrase }
