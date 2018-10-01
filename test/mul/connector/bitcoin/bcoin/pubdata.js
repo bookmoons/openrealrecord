@@ -39,6 +39,7 @@ test.beforeEach(async t => {
     network: regtest,
     feeProvider,
     wallet: {
+      port: blockchain.walletNodeRpcPort,
       apiKey: blockchain.walletNodeApiKey,
       id: blockchain.walletId,
       passphrase: blockchain.walletPassphrase,

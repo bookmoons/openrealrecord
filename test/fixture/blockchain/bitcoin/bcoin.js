@@ -30,6 +30,7 @@ class BcoinBitcoinBlockchainFixture {
       chainNodeRpcPort: null,
       chainNodeClient: null,
       walletNode: null,
+      walletNodeRpcPort: null,
       walletNodeClient: null,
       walletToken: null,
       walletClient: null,
@@ -52,8 +53,10 @@ class BcoinBitcoinBlockchainFixture {
       client: chainNodeClient
     } = await privm.createChainNodeClient.call(this)
     const {
-      node: walletNode
+      node: walletNode,
+      rpcPort: walletNodeRpcPort
     } = await privm.createWalletNode.call(this)
+    priv.walletNodeRpcPort = walletNodeRpcPort
     const {
       client: walletNodeClient
     } = privm.createWalletNodeClient.call(this)
@@ -268,6 +271,19 @@ class BcoinBitcoinBlockchainFixture {
   }
 
   /**
+   * Wallet node RPC server port.
+   *
+   * `null` if fixture is inactive.
+   *
+   * @var {?number}
+   * @readonly
+   */
+  get walletNodeRpcPort () {
+    const priv = privs.get(this)
+    return priv.walletNodeRpcPort
+  }
+
+  /**
    * Wallet client for created wallet.
    *
    * `null` if fixture is inactive.
@@ -341,7 +357,7 @@ const privm = {
       network: regtest.type,
       listen: false,
       nodePort: this.chainNodeRpcPort,
-      httpPort: regtest.walletPort,
+      httpPort: 0, // Arbitrary unused port
       memory: true,
       workers: false,
       logFile: false,
@@ -357,7 +373,9 @@ const privm = {
       hash: false
     })
     await node.open()
-    return { node }
+    const httpServer = node.http.http
+    const { port: rpcPort } = httpServer.address()
+    return { node, rpcPort }
   },
 
   /**
@@ -370,7 +388,7 @@ const privm = {
   createWalletNodeClient () {
     const client = new WalletClient({
       network: regtest.type,
-      port: regtest.walletPort,
+      port: this.walletNodeRpcPort,
       apiKey: this.walletNodeApiKey
     })
     return { client }
@@ -394,6 +412,7 @@ const privm = {
  * @typedef {object} CreateWalletNodeReturn
  *
  * @prop {bcoin.wallet.Node} node - Wallet node.
+ * @prop {number} rpcPort - RPC server port.
  */
 
 /**
