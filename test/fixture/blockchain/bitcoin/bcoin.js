@@ -87,15 +87,41 @@ class BcoinBitcoinBlockchainFixture {
   /**
    * Mine coins into generated address.
    *
-   * TODO: Mine less and await propagation.
+   * Mines the specified number of blocks.
+   * Waits for propagation to wallet.
    *
-   * @param {number} [blocksCount=300] - Number of blocks to mine.
+   * @param {number} [blocksCount=101] - Number of blocks to mine.
    */
-  async mine (blocksCount = 300) {
+  async mine (blocksCount = 101) {
     const priv = privs.get(this)
-    const { address, chainNode, chainNodeClient } = priv
+    const { address, chainNode, chainNodeClient, walletNodeClient } = priv
+
+    // Watch for completion
+    const completePromise = new Promise(
+      function watchMineCompletion (resolve, reject) {
+        function handleTimedOut () {
+          walletNodeClient.socket.unbind('balance', handleBlock)
+          reject(new Error('timed out'))
+        }
+        function handleBlock () {
+          blocksMined++
+          if (blocksMined === blocksCount) handleComplete()
+        }
+        function handleComplete () {
+          clearTimeout(timer)
+          walletNodeClient.socket.unbind('balance', handleBlock)
+          resolve()
+        }
+        let blocksMined = 0
+        const timer = setTimeout(handleTimedOut, 5000) // 5 seconds
+        walletNodeClient.bind('balance', handleBlock)
+      }
+    )
+
+    // Mine
     chainNode.miner.addresses.push(address)
     await chainNodeClient.execute('generate', [ blocksCount ])
+    await completePromise
   }
 
   /**
