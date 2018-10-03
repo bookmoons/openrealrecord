@@ -5,6 +5,7 @@ class StubStream extends EventEmitter {
   constructor (...args) {
     super(...args)
     this.write = sinon.stub()
+    this.writeCheckPub = sinon.stub()
   }
 }
 
