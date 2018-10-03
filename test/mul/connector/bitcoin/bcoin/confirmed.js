@@ -41,11 +41,12 @@ test.afterEach.always(async t => {
 test.serial('already confirmed', async t => {
   const { blockchain, connector } = t.context
   const output = { value: 50000, address: outputAddress }
-  const { hash: txid } = await blockchain.walletClient.send({
+  const { hash: txidString } = await blockchain.walletClient.send({
     passphrase: blockchain.walletPassphrase,
     rate: feeRate,
     outputs: [ output ]
   })
+  const txid = Buffer.from(txidString, 'hex')
   await blockchain.chainNodeClient.execute('generate', [ 1 ])
   const txConfirmedPromise = connector.txConfirmed(txid, 1, timeout)
   await t.notThrowsAsync(txConfirmedPromise, 'tx confirmed')
@@ -54,11 +55,12 @@ test.serial('already confirmed', async t => {
 test.serial('confirmed subsequent', async t => {
   const { blockchain, connector } = t.context
   const output = { value: 50000, address: outputAddress }
-  const { hash: txid } = await blockchain.walletClient.send({
+  const { hash: txidString } = await blockchain.walletClient.send({
     passphrase: blockchain.walletPassphrase,
     rate: feeRate,
     outputs: [ output ]
   })
+  const txid = Buffer.from(txidString, 'hex')
   const txConfirmedPromise = connector.txConfirmed(txid, 1, timeout)
   await blockchain.chainNodeClient.execute('generate', [ 1 ])
   await t.notThrowsAsync(txConfirmedPromise, 'tx confirmed')
@@ -66,23 +68,13 @@ test.serial('confirmed subsequent', async t => {
 
 test.serial('timeout', async t => {
   const { connector } = t.context
-  const txid =
+  const txidString =
     '0123456789012345678901234567890123456789012345678901234567890123'
+  const txid = Buffer.from(txidString, 'hex')
   const txConfirmedPromise = connector.txConfirmed(txid, 1, 0)
   await t.throwsAsync(
     txConfirmedPromise,
     'timed out',
     'wait timed out'
-  )
-})
-
-test.serial('invalid txid', async t => {
-  const { connector } = t.context
-  const txid = 'zz'
-  const txConfirmedPromise = connector.txConfirmed(txid, 1, timeout)
-  await t.throwsAsync(
-    txConfirmedPromise,
-    'hash must be a hex string.',
-    'invalid txid failed'
   )
 })

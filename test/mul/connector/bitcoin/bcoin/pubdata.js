@@ -12,6 +12,7 @@ const feeRate = 1000000 // 0.01 BTC
 // Watch chain for confirmation of named transaction
 function txConfirmed (blockchain, txid) {
   return new Promise(function executeTxConfirmed (resolve, reject) {
+    const txidString = txid.toString('hex')
     function handleTimeout () {
       blockchain.chainNode.removeListener('block', checkBlockForTx)
       reject(new Error('timed out'))
@@ -19,7 +20,7 @@ function txConfirmed (blockchain, txid) {
     function checkBlockForTx (block) {
       if (block.txs.length < 2) return
       for (const tx of block.txs) {
-        if (tx.txid() === txid) {
+        if (tx.txid() === txidString) {
           blockchain.chainNode.removeListener('block', checkBlockForTx)
           resolve(tx)
           return
@@ -110,9 +111,8 @@ test.serial('success', async t => {
   await blockchain.mine()
   const data = Buffer.from([ 0x01, 0x02, 0x03 ])
   const txid = await connector.publishData(data)
-  t.is(typeof txid, 'string')
-  t.is(txid.length, 64)
-  t.regex(txid, /[0-9a-fA-F]{2}/g) // Hexadecimal string
+  t.true(txid instanceof Buffer)
+  t.is(txid.length, 32)
   const txConfirmedPromise = txConfirmed(blockchain, txid)
   await blockchain.chainNodeClient.execute('generate', [ 1 ])
   await t.notThrowsAsync(txConfirmedPromise, 'tx published')
