@@ -209,7 +209,7 @@ function main (err) {
       const module = new LinesNodeStreamModule(writeStream, process.stdin)
       module.done
         .then(finish)
-        .catch(function (e) { finish(e) })
+        .catch(finish)
       module.start()
     }
     if (sw && !opts.serve && !opts.pipe) {
