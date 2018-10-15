@@ -4,6 +4,7 @@ var hyperstream = require('..')
 var minimist = require('minimist')
 var low = require('last-one-wins')
 var util = require('../lib/util')
+var LinesNodeStreamModule = require('../lib/module/nodestream/lines')
 
 var opts = minimist(process.argv.slice(2))
 
@@ -18,6 +19,7 @@ if (opts.help || process.argv.length === 2) {
   console.log('  --serve                   connect to the network and communicate until terminated')
   console.log('  --authorize [key]         publicize a user\'s stream')
   console.log('  --pipe [key]              publicize from stdin and/or write stream to stdout')
+  console.log('  --pipelines [key]        publicize lines from stdin')
   console.log('  --start offset            rewind stream to offset before output')
   console.log('  --myname name             set stream name')
   console.log('  --myowner key             set stream owner')
@@ -111,7 +113,7 @@ function streamsOut () {
   var numValidatedEnd
 
   streamOut()
- 
+
   function streamOut() {
     hs.getStream(streams[idx], gotStream)
   }
@@ -186,19 +188,29 @@ function streamsOut () {
 function main (err) {
   if (err) console.error(err)
   try {
+    var writeStream
     if (opts.authorize) {
       var authorizee = opts.authorize
       opts.authorize = null
       return hs.db.authorize(Buffer.from(authorizee, 'base64'), main)
     }
     if (opts.pipe) {
-      var writeStream = hs.createWriteStream()
+      writeStream = hs.createWriteStream()
       writeStream.on('error', console.error)
       process.stdin.pipe(writeStream)
       process.stdin.on('end', finish)
       if (opts.pipe !== true) {
         pipeout(opts.pipe, finish)
       }
+    }
+    if (opts.pipelines) {
+      writeStream = hs.createWriteStream()
+      writeStream.on('error', console.error)
+      const module = new LinesNodeStreamModule(writeStream, process.stdin)
+      module.done
+        .then(finish)
+        .catch(function (e) { finish(e) })
+      module.start()
     }
     if (sw && !opts.serve && !opts.pipe) {
       finish()
